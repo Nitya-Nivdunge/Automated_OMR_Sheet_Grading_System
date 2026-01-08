@@ -1,128 +1,215 @@
-Based on your repository, I've created a comprehensive README file below. It explains the project, its structure, and how to set it up.
-
 # 📝 Automated OMR Sheet Grading System
 
-An image processing and computer vision project designed to automatically grade scanned Optical Mark Recognition (OMR) sheets using contour detection and analysis.
+An automated system for grading Optical Mark Recognition (OMR) sheets using computer vision techniques. This project processes scanned answer sheets, detects marked responses, compares them against correct answers, and generates graded results with visual feedback.
 
-## 📖 Overview
+## 📋 Table of Contents
+- [Features](#features)
+- [System Architecture](#system-architecture)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [Configuration](#configuration)
+- [Output](#output)
+- [Troubleshooting](#troubleshooting)
 
-This system processes scanned OMR answer sheets to detect and evaluate marked responses automatically. By leveraging computer vision techniques, it eliminates manual grading efforts and provides accurate, efficient assessment of multiple-choice questionnaires.
+## ✨ Features
 
-## ✨ Key Features
+- **Automated Answer Detection**: Uses contour analysis to identify and extract OMR bubbles
+- **Perspective Correction**: Handles skewed/scanned images with perspective transformation
+- **Smart Thresholding**: Adaptive detection of marked vs. unmarked bubbles
+- **Answer Validation**: Compares student answers against provided answer key
+- **Visual Feedback**: Generates color-coded results (Green=Correct, Red=Wrong, Blue=Unanswered)
+- **OCR Integration**: Optional text recognition for additional processing
+- **Database Storage**: Saves results to database for record-keeping
+- **Multi-format Output**: Saves processed images at each pipeline stage
 
-- **Automated OMR Processing**: Detects and analyzes marked bubbles on answer sheets
-- **Contour-based Detection**: Uses advanced contour analysis to identify answer regions
-- **Template Matching**: Aligns scanned sheets with a reference template for accurate grading
-- **Database Integration**: Includes SQL scripts for storing and managing results
-- **Visual Output**: Generates processed images showing detected contours and marked answers
+## 🏗️ System Architecture
+
+### Processing Pipeline
+1. **Image Preprocessing** → Grayscale conversion, Gaussian blur, Canny edge detection
+2. **Contour Detection** → Finds all contours, identifies three largest rectangular regions
+3. **Perspective Warping** → Corrects image perspective for consistent analysis
+4. **Bubble Segmentation** → Splits OMR sheet into individual question cells
+5. **Pixel Analysis** → Calculates marked bubbles using non-zero pixel counts
+6. **Grading Logic** → Compares against answer key with confidence thresholding
+7. **Visualization** → Overlays results on original image with score display
+
+## 📦 Installation
+
+### Prerequisites
+- Python 3.8 or higher
+- Tesseract OCR (for text recognition features)
+
+### Step 1: Install Dependencies
+```bash
+pip install opencv-python numpy pytesseract
+```
+
+### Step 2: Install Tesseract OCR
+- **Windows**: Download from [GitHub Tesseract](https://github.com/UB-Mannheim/tesseract/wiki)
+- **Linux**: `sudo apt-get install tesseract-ocr`
+- **macOS**: `brew install tesseract`
+
+### Step 3: Clone Repository
+```bash
+git clone https://github.com/Nitya-Nivdunge/Automated_OMR_Sheet_Grading_System.git
+cd Automated_OMR_Sheet_Grading_System
+```
+
+## 🚀 Usage
+
+### Basic Execution
+1. Place your OMR sheet image in the `Input Images/` folder
+2. Run the main script:
+```bash
+python OMR_img.py
+```
+
+### Interactive Input
+When prompted:
+1. Enter the number of questions on the sheet
+2. Enter the correct answers (space-separated, e.g., `A B C D A B C D`)
+
+### Example
+```bash
+$ python OMR_img.py
+Enter no. of Questions: 20
+Enter the answers of 20 questions: e.g., A B A D... (space-separated)
+A A B B C C D B C A B B C A D B C D C C
+```
+
+### Processing Multiple Sheets
+Modify the `path` variable in `OMR_img.py`:
+```python
+# Change this line to process different images
+path = "Input Images/Stu_1.png"  # Change filename as needed
+```
 
 ## 📁 Project Structure
 
 ```
 Automated_OMR_Sheet_Grading_System/
+├── OMR_img.py              # Main processing script (core functionality)
+├── OCR.py                  # OCR and database integration module
+├── utlis.py                # Utility functions for image processing
+├── create_table.sql        # Database schema for storing results
+├── template.png            # Reference template for OMR sheet
+├── .gitignore              # Git exclusion rules
 │
-├── Contours/                    # Contour detection and processing modules
-├── Input Images/                # Folder for raw OMR sheet scans to process
-├── Output Images/               # Processed results and visual outputs
+├── Input Images/           # Directory for input OMR sheets
+│   └── Stu_1.png          # Example input image
 │
-├── OCR.py                       # Optical Character Recognition module
-├── OMR_img.py                   # Main OMR processing and grading logic
-├── utlis.py                     # Utility functions and helpers
-├── template.png                 # Reference OMR sheet template
-├── create_table.sql             # Database schema for storing results
-├── .gitignore                   # Git exclusion rules
+├── Output Images/          # Processed results (auto-generated)
+│   ├── PreProcessing_Contours.jpg
+│   ├── Processing_Output.jpg
+│   ├── Inverse_Processing.jpg
+│   └── Final_Score.jpg
 │
-└── C171_C177_C195_C196_IVP_Research_Paper.pdf  # Related research paper
+├── Contours/               # Contour processing modules
+└── C171_C177_C195_C196_IVP_Research_Paper.pdf  # Research documentation
 ```
 
-## 🚀 Getting Started
+## ⚙️ Configuration
 
-### Prerequisites
+### Key Parameters in OMR_img.py
+```python
+# Image Settings
+width = 600        # Resize width
+height = 700       # Resize height
 
-- Python 3.x
-- OpenCV (cv2)
-- NumPy
-- Other dependencies as required by the scripts
+# Processing Parameters
+threshold = 800    # Minimum pixel difference for confident answer detection
+choices = 4        # Number of choices per question (A/B/C/D)
 
-### Installation
+# Output Settings
+output_width, output_height = 350, 1400  # Warped MCQ box dimensions
+score_width, score_height = 450, 200     # Score box dimensions
+```
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Nitya-Nivdunge/Automated_OMR_Sheet_Grading_System.git
-   cd Automated_OMR_Sheet_Grading_System
-   ```
+### Customization Options
+1. **Adjust Threshold Sensitivity**: Modify `threshold` variable for different lighting conditions
+2. **Change Answer Mapping**: Update `answer_map` dictionary for different labeling schemes
+3. **Modify Output Size**: Adjust warping dimensions for different OMR sheet formats
 
-2. **Install required packages**
-   ```bash
-   pip install opencv-python numpy
-   ```
+## 📊 Output
 
-3. **Set up your database** (if using database features)
-   ```bash
-   # Run the SQL script to create necessary tables
-   ```
+### Generated Files
+1. **PreProcessing_Contours.jpg** - Edge detection and contour identification
+2. **Processing_Output.jpg** - Warped images, thresholding, and answer marking
+3. **Inverse_Processing.jpg** - Perspective-corrected visualizations
+4. **Final_Score.jpg** - Original image with overlaid results and final score
 
-### Usage
+### Console Output
+```
+Mapped answers to integers: [0, 0, 1, 1, 2, 2, 3, 1, 2, 0, ...]
 
-1. **Place your OMR sheet images** in the `Input Images/` folder
+MCQ 1 BOX:
+Area: 12345
+Corner Points: [[x1,y1], [x2,y2], [x3,y3], [x4,y4]]
 
-2. **Run the main OMR processing script**:
-   ```bash
-   python OMR_img.py
-   ```
+Ans: ['A', 'A', 'B', 'None', ...]
+(R/W/N): ['R', 'R', 'W', 'N', ...]
+Index: [0, 0, 1, -1, ...]
 
-3. **Check the results** in the `Output Images/` folder and database
+Final Percentage: 85.0%
+```
 
-4. **For OCR functionality** (if needed):
-   ```bash
-   python OCR.py
-   ```
+### Visual Indicators
+- **Green Circle**: Correct answer
+- **Red Circle**: Wrong answer  
+- **Blue Circle**: Unanswered question
+- **Red Box**: MCQ answer regions
+- **Blue Box**: Score display region
 
-## 🔧 How It Works
+## 🔧 Troubleshooting
 
-1. **Image Preprocessing**: The system loads and preprocesses the scanned OMR sheet
-2. **Template Alignment**: Aligns the input sheet with the reference template
-3. **Contour Detection**: Identifies all potential answer bubbles using contour analysis
-4. **Bubble Analysis**: Determines which bubbles are filled/marked
-5. **Grading Logic**: Compares detected answers with answer key
-6. **Result Output**: Saves processed images and stores scores
+### Common Issues
 
-## 📊 Expected Results
+| Issue | Solution |
+|-------|----------|
+| "No contours found" | Check image quality, adjust Canny edge thresholds |
+| Incorrect answer detection | Modify `threshold` value in pixel analysis section |
+| Perspective warp distortion | Ensure OMR sheet is properly aligned in image |
+| Database connection errors | Verify database credentials in `OCR.py` |
+| Tesseract OCR errors | Ensure Tesseract is installed and in system PATH |
 
-The system generates:
-- Processed images with detected contours highlighted
-- Grading results for each OMR sheet
-- Structured data suitable for database storage
-- Visual feedback on marked answers
+### Debug Mode
+For debugging, uncomment these lines in `OMR_img.py`:
+```python
+# cv2.imshow("Edge Detection : ",img_canny)
+# cv2.waitKey(0)
+```
 
-## 📚 Technical Details
+## 📈 Performance Optimization
 
-- **Primary Language**: Python
-- **Core Libraries**: OpenCV for computer vision tasks
-- **Processing Method**: Contour-based detection and analysis
-- **Output Formats**: Processed images, database records
+1. **Image Resolution**: For faster processing, reduce `width` and `height` values
+2. **Batch Processing**: Modify script to loop through multiple images in `Input Images/` folder
+3. **Parallel Processing**: Implement multi-threading for processing multiple sheets simultaneously
 
-## 🔮 Future Enhancements
+## 🔗 Dependencies
 
-Consider expanding this project with:
-- Web interface for easy upload and grading
-- Support for different OMR sheet formats
-- Export functionality (PDF reports, Excel sheets)
-- Batch processing of multiple sheets
-- Enhanced error handling for poor-quality scans
+- **OpenCV 4.x**: Computer vision operations
+- **NumPy 1.19+**: Numerical computations and array operations
+- **PyTesseract**: OCR functionality (optional)
+- **SQL Database**: MySQL/PostgreSQL for result storage
 
-## 📄 License
+## 📝 License
 
-This project is available for academic and educational purposes. For more details on usage rights, please refer to the included research paper.
+Academic and educational use. See included research paper for detailed methodology.
 
 ## 👥 Contributors
 
-- **Nitya Nivdunge** - Project developer
+- **Nitya Nivdunge** - Project Developer & Maintainer
 
 ---
 
-**Note**: For detailed understanding of the algorithms and methodologies, please refer to the included research paper `C171_C177_C195_C196_IVP_Research_Paper.pdf`.
+### Quick Start Checklist
+- [ ] Install Python dependencies
+- [ ] Install Tesseract OCR (if using OCR features)
+- [ ] Place OMR sheet in `Input Images/` folder
+- [ ] Update `path` variable in `OMR_img.py` if needed
+- [ ] Run `python OMR_img.py`
+- [ ] Enter number of questions and answer key when prompted
+- [ ] Check `Output Images/` folder for results
 
-I recommend copying this entire text into a file named `README.md` in your repository's root folder. The file will automatically display on your GitHub page.
-
-Is there a specific section of the project you'd like me to explain in more detail, such as how the contour detection works or how to interpret the output?
+For detailed algorithm explanation, refer to `C171_C177_C195_C196_IVP_Research_Paper.pdf`.
