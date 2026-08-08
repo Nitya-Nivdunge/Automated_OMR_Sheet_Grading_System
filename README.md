@@ -201,7 +201,7 @@ Academic and educational use. See included research paper for detailed methodolo
 
 - **Nitya Nivdunge** - Project Developer & Maintainer
 
----
+
 
 ### Quick Start Checklist
 - [ ] Install Python dependencies
